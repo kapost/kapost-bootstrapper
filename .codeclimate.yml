@@ -2,8 +2,6 @@
 engines:
   rubocop:
     enabled: true
-  bundler-audit:
-    enabled: true
   reek:
     enabled: true
   shellcheck:
