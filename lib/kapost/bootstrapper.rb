@@ -29,6 +29,7 @@ module Kapost
         say(help) if help
         shell.exit 1
       end
+      success
     end
 
     def check_bundler
