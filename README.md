@@ -1,5 +1,7 @@
 # Kapost::Bootstrapper
 
+[![Gem Version](https://badge.fury.io/rb/kapost-bootstrapper.svg)](https://badge.fury.io/rb/kapost-bootstrapper)[![CircleCI](https://circleci.com/gh/kapost/kapost-bootstrapper.svg?style=svg)](https://circleci.com/gh/kapost/kapost-bootstrapper)[![Code Climate](https://codeclimate.com/repos/57572a32ba1caf007e0006eb/badges/5709b4889adbab6624da/gpa.svg)](https://codeclimate.com/repos/57572a32ba1caf007e0006eb/feed)[![Test Coverage](https://codeclimate.com/repos/57572a32ba1caf007e0006eb/badges/5709b4889adbab6624da/coverage.svg)](https://codeclimate.com/repos/57572a32ba1caf007e0006eb/coverage)
+
 Used by Kapost apps to get themselves bootstrapped. To enhance developer happiness, every app should have a single command to get it set up (`./bin/setup`) and one command to run the whole thing (`./bin/run`). This gem attempts to help with the first script by encapsulating a useful set of helper functions that makes detecting and installing dependencies simpler.
 
 ## Installation
