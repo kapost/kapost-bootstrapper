@@ -6,8 +6,6 @@ engines:
     enabled: true
   shellcheck:
     enabled: true
-  brakeman:
-    enabled: true
 
 ratings:
   paths:
