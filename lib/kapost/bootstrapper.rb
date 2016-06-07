@@ -34,13 +34,13 @@ module Kapost
 
     def check_bundler
       check "bundler" do
-        sh "gem install bundler --conservative", verbose: false
+        sh "gem install bundler --conservative &>/dev/null", verbose: false
       end
     end
 
     def bundle
       check "gems" do
-        sh "bundle check || bundle install", verbose: false
+        sh "bundle check &>/dev/null || bundle install &>/dev/null", verbose: false
       end
     end
 
