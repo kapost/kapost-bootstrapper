@@ -1,0 +1,22 @@
+---
+engines:
+  rubocop:
+    enabled: true
+  bundler-audit:
+    enabled: true
+  reek:
+    enabled: true
+  shellcheck:
+    enabled: true
+  brakeman:
+    enabled: true
+
+ratings:
+  paths:
+  - lib/**
+  - "**/*.rb"
+
+exclude_paths:
+  - spec/**/*
+  - "**/vendor/**/*"
+
