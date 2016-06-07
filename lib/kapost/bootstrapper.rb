@@ -3,11 +3,13 @@ require "open3"
 module Kapost
   # Application dependency installer for this Rails application.
   class Bootstrapper
-    def initialize(cli: Open3, printer: $stdout, platform: RUBY_PLATFORM, &block)
-      @cli = cli
-      @printer = printer
+    def initialize(cli: Open3, printer: $stdout, platform: RUBY_PLATFORM, shell: Kernel, &block)
+      @cli      = cli
+      @printer  = printer
       @platform = platform
-      instance_eval(&block)
+      @shell    = shell
+
+      run(&block) if block_given?
     end
 
     def osx(&block)
@@ -25,7 +27,7 @@ module Kapost
 
       unless success
         say(help) if help
-        exit 1
+        shell.exit 1
       end
     end
 
@@ -73,9 +75,13 @@ module Kapost
       result
     end
 
+    def run(&code)
+      instance_eval(&code)
+    end
+
     private
 
-    attr_reader :cli, :printer, :platform
+    attr_reader :cli, :printer, :platform, :shell
 
     def label(text, version = nil)
       "#{[text, version].compact.join(' ')}:".ljust(15)
