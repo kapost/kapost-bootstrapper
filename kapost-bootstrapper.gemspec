@@ -7,11 +7,10 @@ Gem::Specification.new do |spec|
   spec.name          = "kapost-bootstrapper"
   spec.version       = Kapost::Bootstrapper::VERSION
   spec.authors       = ["Paul Sadauskas"]
-  spec.email         = ["psadauskas@gmail.com"]
+  spec.email         = ["paul@sadauskas.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = %q{A small helper utility for your app to declare and setup its system dependencies}
+  spec.homepage      = "https://github.com/kapost/kapost-bootstrapper"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
