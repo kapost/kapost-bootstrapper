@@ -13,7 +13,7 @@ Add a file to your project called `bin/setup` with these contents:
 
 set -euvxo pipefail
 
-gem which kapost-bootstrapper || gem install kapost-bootstrapper
+gem which kapost/bootstrapper || gem install kapost-bootstrapper
 
 ./bin/bootstrap
 ```
@@ -25,7 +25,7 @@ Then, use the gem's helper functions in your file called `./bin/bootstrap`. See 
 Example `./bin/bootstrap`:
 
 ```ruby
-#!/usr/bin/env/ruby
+#!/usr/bin/env ruby
 
 require "pathname"
 
