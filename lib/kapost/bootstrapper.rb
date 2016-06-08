@@ -45,7 +45,7 @@ module Kapost
     end
 
     def installed?(command)
-      _, status = cli.capture2e "type #{command}"
+      _, status = cli.capture2e "bash -c 'type #{command}'"
       status.success?
     end
 

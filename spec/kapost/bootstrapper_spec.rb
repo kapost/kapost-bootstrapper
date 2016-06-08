@@ -58,7 +58,7 @@ describe Kapost::Bootstrapper do
         end
 
         it "should check if the command exists" do
-          expect(cli).to have_received(:capture2e).with("type acommand")
+          expect(cli).to have_received(:capture2e).with("bash -c 'type acommand'")
         end
       end
 
