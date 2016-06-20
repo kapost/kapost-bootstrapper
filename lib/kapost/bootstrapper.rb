@@ -53,7 +53,11 @@ module Kapost
     end
 
     def default_check(command, version)
-      installed?(command) and (!version or right_version?(command, version))
+      installed?(command) or raise CommandNotFoundError, command
+      if version
+        actual_version = right_version?(command, version) or raise CommandVersionMismatchError, command, version, actual_version
+      end
+      true
     end
 
     def check(command, help = nil, version: nil)
@@ -82,16 +86,12 @@ module Kapost
 
     def installed?(command)
       _, status = cli.capture2e "bash -c 'type #{command}'"
-      raise CommandNotFoundError, command unless status.success?
-      true
+      status.success?
     end
 
     def right_version?(command, expected_version)
       version, status = cli.capture2e "#{command} --version"
-      unless status.success? && version.include?(expected_version)
-        raise CommandVersionMismatchError, command, expected_version, version
-      end
-      true
+      status.success? && version.include?(expected_version) && version
     end
 
     def say(message)
@@ -110,7 +110,7 @@ module Kapost
     def sh(*cmd)
       options = (Hash === cmd.last) ? cmd.pop : {}
       say(cmd.join(" ")) if options[:verbose]
-      result = cli.system(*cmd)
+      result = shell.system(*cmd)
       status = $?
       raise CommandFailedError.new(cmd.join(" "), status.exitstatus) unless result
       result
