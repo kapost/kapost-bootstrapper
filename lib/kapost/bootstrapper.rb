@@ -16,6 +16,10 @@ module Kapost
       instance_eval(&block) if os == :macosx
     end
 
+    def debian(&block)
+      instance_eval(&block) if os == :debian
+    end
+
     def check(command, help = nil, version: nil, &block)
       success = say(label(command, version)) do
         if block_given?
@@ -95,7 +99,7 @@ module Kapost
                 when /darwin|mac os/
                   :macosx
                 when /linux/
-                  :linux
+                  installed?("apt-get") ? :debian : :linux
                 else
                   fail "unknown os: #{RUBY_PLATFORM.inspect}"
               end
