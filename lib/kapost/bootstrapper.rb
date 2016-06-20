@@ -3,6 +3,18 @@ require "open3"
 module Kapost
   # Application dependency installer for this Rails application.
   class Bootstrapper
+
+    class CommandFailedError < StandardError
+      attr_reader :command, :status
+      def initialize(command, status)
+        @command, @status = command, status
+      end
+
+      def message
+        "Command `#{cmd}` failed with status #{status}"
+      end
+    end
+
     def initialize(cli: Open3, printer: $stdout, platform: RUBY_PLATFORM, shell: Kernel, &block)
       @cli      = cli
       @printer  = printer
@@ -12,20 +24,18 @@ module Kapost
       run(&block) if block_given?
     end
 
-    def check(command, help = nil, version: nil, &block)
-      success = say(label(command, version)) do
-        if block_given?
-          yield
-        else
-          installed?(command) and (!version or right_version?(command, version))
-        end
-      end
+    def default_check(command, version)
+      installed?(command) and (!version or right_version?(command, version))
+    end
 
-      unless success
-        say(help) if help
-        shell.exit 1
-      end
-      success
+    def check(command, help = nil, version: nil)
+      say(label(command, version)) do
+        begin
+          block_given? ? yield : default_check(command, version)
+        rescue CommandFailedError => ex
+          die help, exception: ex
+        end
+      end or die(help)
     end
 
     def check_bundler
@@ -68,8 +78,14 @@ module Kapost
       say(cmd.join(" ")) if options[:verbose]
       result = system(*cmd)
       status = $?
-      fail "Command `#{cmd.join(' ')}` failed with status #{status.exitstatus}" unless result
+      raise CommandFailedError, cmd.join(" "), status.exitstatus unless result
       result
+    end
+
+    def die(help, exception: nil)
+      say(exception.message) if exception
+      say(help) if help
+      shell.exit 1
     end
 
     def osx(&block)
