@@ -4,14 +4,42 @@ module Kapost
   # Application dependency installer for this Rails application.
   class Bootstrapper
 
-    class CommandFailedError < StandardError
-      attr_reader :command, :status
-      def initialize(command, status)
-        @command, @status = command, status
+    class CommandError < StandardError
+      attr_reader :command
+
+      def initialize(command)
+        @command = command
+      end
+    end
+
+    class CommandNotFoundError < CommandError
+      def message
+        "command `%s` not found" % command
+      end
+    end
+
+    class CommandVersionMismatchError < CommandError
+      attr_reader :expected_version, :actual_version
+
+      def initialize(command, expected_version, actual_version)
+        super(command)
+        @expected_version, @actual_version = expected_version, actual_version
       end
 
       def message
-        "Command `#{cmd}` failed with status #{status}"
+        "command `%s` has incorrect version. I expected %s, but you have %s" % [command, expected_version, actual_version]
+      end
+    end
+
+    class CommandFailedError < CommandError
+      attr_reader :status
+      def initialize(command, status)
+        super(command)
+        @status = status
+      end
+
+      def message
+        "Command `#{command}` failed with status #{status}"
       end
     end
 
@@ -21,7 +49,7 @@ module Kapost
       @platform = platform
       @shell    = shell
 
-      run(&block) if block_given?
+      instance_eval(&block) if block_given?
     end
 
     def default_check(command, version)
@@ -32,10 +60,12 @@ module Kapost
       say(label(command, version)) do
         begin
           block_given? ? yield : default_check(command, version)
-        rescue CommandFailedError => ex
+          true
+        rescue CommandError => ex
           die help, exception: ex
         end
-      end or die(help)
+      end
+      true
     end
 
     def check_bundler
@@ -52,12 +82,16 @@ module Kapost
 
     def installed?(command)
       _, status = cli.capture2e "bash -c 'type #{command}'"
-      status.success?
+      raise CommandNotFoundError, command unless status.success?
+      true
     end
 
     def right_version?(command, expected_version)
       version, status = cli.capture2e "#{command} --version"
-      status.success? && version.include?(expected_version)
+      unless status.success? && version.include?(expected_version)
+        raise CommandVersionMismatchError, command, expected_version, version
+      end
+      true
     end
 
     def say(message)
@@ -76,9 +110,9 @@ module Kapost
     def sh(*cmd)
       options = (Hash === cmd.last) ? cmd.pop : {}
       say(cmd.join(" ")) if options[:verbose]
-      result = system(*cmd)
+      result = cli.system(*cmd)
       status = $?
-      raise CommandFailedError, cmd.join(" "), status.exitstatus unless result
+      raise CommandFailedError.new(cmd.join(" "), status.exitstatus) unless result
       result
     end
 
@@ -101,7 +135,7 @@ module Kapost
     end
 
     def run(&code)
-      instance_eval(&code)
+      instance_eval(&code) or raise CommandError, code
     end
 
     private

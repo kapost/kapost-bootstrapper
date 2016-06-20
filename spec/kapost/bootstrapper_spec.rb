@@ -32,7 +32,7 @@ describe Kapost::Bootstrapper do
   let(:platform) { "x86_64-darwin15" } # OSX
   let(:shell)    { class_spy Kernel, exit: nil }
 
-  let(:success)  { instance_spy Process::Status, exitstatus: 0 }
+  let(:success)  { instance_spy Process::Status, exitstatus: 0, success?: true  }
   let(:error)    { instance_spy Process::Status, exitstatus: 1, success?: false }
 
   subject(:bootstrapper) { Kapost::Bootstrapper.new cli: cli,
@@ -95,7 +95,7 @@ describe Kapost::Bootstrapper do
 
       context "on error" do
         before do
-          bootstrapper.run { check("test help", "Some help text") { false } }
+          bootstrapper.run { check("test help", "Some help text") { run { false } } }
         end
 
         it "should print the help text after the label" do
