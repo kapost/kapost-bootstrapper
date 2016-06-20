@@ -63,13 +63,12 @@ module Kapost
     def check(command, help = nil, version: nil)
       say(label(command, version)) do
         begin
-          block_given? ? yield : default_check(command, version)
-          true
+          result = block_given? ? yield : default_check(command, version)
+          @platform_result || result
         rescue CommandError => ex
           die help, exception: ex
         end
-      end
-      true
+      end or die(help)
     end
 
     def check_bundler
@@ -123,15 +122,15 @@ module Kapost
     end
 
     def osx(&block)
-      run(&block) if os == :macosx
+      @platform_result = run(&block) if os == :macosx
     end
 
     def docker(&block)
-      run(&block) if os == :docker
+      @platform_result = run(&block) if os == :docker
     end
 
     def ubuntu(&block)
-      run(&block) if os == :ubuntu
+      @platform_result = run(&block) if os == :ubuntu
     end
 
     def run(&code)
