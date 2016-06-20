@@ -12,14 +12,6 @@ module Kapost
       run(&block) if block_given?
     end
 
-    def osx(&block)
-      instance_eval(&block) if os == :macosx
-    end
-
-    def debian(&block)
-      instance_eval(&block) if os == :debian
-    end
-
     def check(command, help = nil, version: nil, &block)
       success = say(label(command, version)) do
         if block_given?
@@ -80,6 +72,18 @@ module Kapost
       result
     end
 
+    def osx(&block)
+      run(&block) if os == :macosx
+    end
+
+    def docker(&block)
+      run(&block) if os == :docker
+    end
+
+    def ubuntu(&block)
+      run(&block) if os == :ubuntu
+    end
+
     def run(&code)
       instance_eval(&code)
     end
@@ -99,7 +103,13 @@ module Kapost
                 when /darwin|mac os/
                   :macosx
                 when /linux/
-                  installed?("apt-get") ? :debian : :linux
+                  if File.exist?("/.dockerenv")
+                    :docker
+                  elsif installed?("apt-get")
+                    :ubuntu
+                  else
+                    :linux
+                  end
                 else
                   fail "unknown os: #{RUBY_PLATFORM.inspect}"
               end
