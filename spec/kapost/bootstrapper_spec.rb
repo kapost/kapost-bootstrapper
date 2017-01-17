@@ -98,12 +98,18 @@ describe Kapost::Bootstrapper do
           bootstrapper.instance_eval { check("test help", "Some help text") { false } }
         end
 
-        it "should print the help text after the label" do
-          expect(printer.output).to include "Some help text"
-        end
+        context "with previous platform success" do
+          before do
+            bootstrapper.instance_eval { check("test help", "Platform help text") { osx { true } } }
+          end
 
-        it "should exit" do
-          expect(shell).to have_received(:exit).with(1).at_least(:once)
+          it "should print the help text after the label" do
+            expect(printer.output).to include "Some help text"
+          end
+
+          it "should exit" do
+            expect(shell).to have_received(:exit).with(1).at_least(:once)
+          end
         end
       end
     end

@@ -63,6 +63,7 @@ module Kapost
     def check(command, help = nil, version: nil)
       say(label(command, version)) do
         begin
+          @platform_result = false
           result = block_given? ? yield : default_check(command, version)
           @platform_result || result
         rescue CommandError => ex
