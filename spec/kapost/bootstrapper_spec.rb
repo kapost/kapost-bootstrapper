@@ -418,7 +418,11 @@ describe Kapost::Bootstrapper do
       it "returns false" do
         expect(bootstrapper.right_version?("ruby", dot_ruby_version)).to equal(false)
       end
+      it "throws an error" do
+        required_ruby_version = '1000.1'
+        bootstrapper.check "ruby", "version help text", version: required_ruby_version
+        expect(printer.output).to include('incorrect version')
+      end
     end
   end
-
 end
