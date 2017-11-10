@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'semantic'
 
 describe Kapost::Bootstrapper do
 
@@ -176,6 +177,197 @@ describe Kapost::Bootstrapper do
 
           it "should not print the success marker" do
             expect(printer.output).to_not include("✓")
+          end
+        end
+      end
+    end
+  end
+
+  describe "#right_version?" do
+
+    context "caret ranges" do
+      before do
+        allow(cli).to receive(:capture2e).and_return(["7.1.2", success])
+      end
+
+      context "when local node/yarn/npm is a major version above package.json" do
+        let(:packagejson_version) {"^6.11.3"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+
+      context "when local node/yarn/npm version is less than package.json" do
+        let(:packagejson_version) {"^7.1.3"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+
+      context "when local node/yarn/npm is equal to package.json" do
+        let(:packagejson_version) {"^7.1.2"}
+        it "returns true" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+    end
+
+    context "> comparator" do
+      before do
+        allow(cli).to receive(:capture2e).and_return(["6.11.2", success])
+      end
+
+      context "when local node/yarn/npm is greater than package.json" do
+        let(:packagejson_version) {">6.11.1"}
+        it "returns true" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+
+      context "when local node/yarn/npm is equal to package.json" do
+        let(:packagejson_version) {">6.11.2"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+
+      context "when local node/yarn/npm is less than package.json" do
+        let(:packagejson_version) {">6.11.3"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+    end
+
+    context ">= comparator" do
+      before do
+        allow(cli).to receive(:capture2e).and_return(["6.11.2", success])
+      end
+
+      context "when local node/yarn/npm is greater than package.json" do
+        let(:packagejson_version) {">=6.11.1"}
+        it "returns true" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+
+      context "when local node/yarn/npm is less than package.json" do
+        let(:packagejson_version) {">=6.11.3"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+
+      context "when local node/yarn/npm is equal to package.json" do
+        let(:packagejson_version) {">=6.11.2"}
+        it "returns true" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+    end
+
+    context "< comparator" do
+      before do
+        allow(cli).to receive(:capture2e).and_return(["6.11.1", success])
+      end
+
+      context "when local node/yarn/npm is less than package.json" do
+        let(:packagejson_version) {"<6.11.4"}
+        it "returns true" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+
+      context "when local node/yarn/npm is greater than package.json" do
+        let(:packagejson_version) {"<6.11.0"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+
+      context "when local node/yarn/npm is equal to package.json" do
+        let(:packagejson_version) {"<6.11.1"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+    end
+
+    context "<= comparator" do
+      before do
+        allow(cli).to receive(:capture2e).and_return(["6.11.3", success])
+      end
+
+      context "when local node/yarn/npm is greater than package.json" do
+        let(:packagejson_version) {"<=6.11.2"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+
+      context "when local node/yarn/npm is less than package.json" do
+        let(:packagejson_version) {"<=6.11.4"}
+        it "returns true" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+
+      context "when local node/yarn/npm is equal to package.json" do
+        let(:packagejson_version) {"<=6.11.3"}
+        it "returns true" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+    end
+
+    context "= or \"\" comparators" do
+      before do
+        allow(cli).to receive(:capture2e).and_return(["6.11.3", success])
+      end
+
+      context "= comparator" do
+
+        context "when local node/yarn/npm is less than package.json" do
+          let(:packagejson_version) {"=6.11.2"}
+          it "returns false" do
+            expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+          end
+        end
+
+        context "when local node/yarn/npm is greater than package.json" do
+          let(:packagejson_version) {"=6.11.4"}
+          it "returns false" do
+            expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+          end
+        end
+
+        context "when local node/yarn/npm is equal to package.json" do
+          let(:packagejson_version) {"=6.11.3"}
+          it "returns true" do
+            expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+          end
+        end
+      end
+
+      context "no comparator" do
+        context "when local node/yarn/npm is less than package.json" do
+          let(:packagejson_version) {"6.11.2"}
+          it "returns false" do
+            expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+          end
+        end
+
+        context "when local node/yarn/npm is greater than package.json" do
+          let(:packagejson_version) {"6.11.4"}
+          it "returns false" do
+            expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+          end
+        end
+
+        context "when local node/yarn/npm is equal to package.json" do
+          let(:packagejson_version) {"6.11.3"}
+          it "returns true" do
+            expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
           end
         end
       end
