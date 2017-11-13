@@ -8,4 +8,5 @@ group :development, :test do
   gem "guard-rspec"
 
   gem "codeclimate-test-reporter", require: nil
+  gem "semantic"
 end
