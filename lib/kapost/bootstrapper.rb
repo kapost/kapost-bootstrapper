@@ -1,4 +1,5 @@
 require "open3"
+require "semantic"
 
 module Kapost
   # Application dependency installer for this Rails application.
