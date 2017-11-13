@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'semantic'
 
 describe Kapost::Bootstrapper do
 
@@ -372,6 +373,53 @@ describe Kapost::Bootstrapper do
       end
     end
 
+    context "node version specific - handling 'v' " do
+      before do
+        allow(cli).to receive(:capture2e).and_return(["v6.11.3", success])
+      end
+
+      context "when local node is less than package.json" do
+        let(:packagejson_version) {"6.11.4"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+
+      context "when local node is greater than package.json" do
+        let(:packagejson_version) {"6.11.2"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+
+      context "when local node is greater than package.json" do
+        let(:packagejson_version) {"6.11.3"}
+        it "returns true" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+    end
+
+  end
+
+  context "ruby version" do
+    before do
+      allow(cli).to receive(:capture2e).and_return(["ruby 2.3.1p112 (2016-04-26 revision 54768) [x86_64-darwin16]", success])
+    end
+
+    context "ruby version includes the expected version" do
+      let(:dot_ruby_version) {"2.3.1"}
+      it "returns true" do
+        expect(bootstrapper.right_version?("ruby", dot_ruby_version)).to equal(true)
+      end
+    end
+
+    context "ruby version is not included in expected version" do
+      let(:dot_ruby_version) {"2.4.1"}
+      it "returns false" do
+        expect(bootstrapper.right_version?("ruby", dot_ruby_version)).to equal(false)
+      end
+    end
   end
 
 end
