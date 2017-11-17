@@ -91,20 +91,27 @@ module Kapost
     end
 
     def right_version?(command, expected_version)
-      version, status = cli.capture2e "#{command} --version"
-      if version[0] == 'v'
-        version = version[1..-1]
-      end
-      if expected_version[0] == '^'
+      version, status = get_version(command)
+      if expected_version[0] == "^"
         next_major = (expected_version[1].to_i + 1).to_s
         Gem::Version.new(version) >= Gem::Version.new(expected_version[1..-1]) && Gem::Version.new(version) < Gem::Version.new(next_major)
       elsif expected_version[0] == "="
         Gem::Version.new(version) == Gem::Version.new(expected_version[1..-1])
-      elsif version.include?("ruby")
-        status.success? && version.include?(expected_version)
       else
         local_version = Semantic::Version.new(version)
         local_version.satisfies?(expected_version)
+      end
+    end
+
+    def get_version(command)
+      version, status = cli.capture2e "#{command} --version"
+      if version[0] == "v"
+        version = version[1..-1]
+      elsif version.include?("ruby")
+        version.slice! "ruby "
+        version = version[0..4]
+      else
+        version
       end
     end
 
