@@ -56,7 +56,7 @@ module Kapost
     def default_check(command, version)
       installed?(command) or raise CommandNotFoundError, command
       if version
-        actual_version = right_version?(command, version) or raise CommandVersionMismatchError, command, version, actual_version
+        actual_version = right_version?(command, version) or raise CommandVersionMismatchError.new(command, version, actual_version)
       end
       true
     end
