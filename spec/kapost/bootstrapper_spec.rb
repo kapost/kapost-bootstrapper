@@ -196,6 +196,20 @@ describe Kapost::Bootstrapper do
         end
       end
 
+      context "when local node/yarn/npm is at a compatible major and minor version for package.json" do
+        let(:packagejson_version) {"^7.1.1"}
+        it "returns true" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+
+      context "when local node/yarn/npm is at a incompatible minor version for package.json" do
+        let(:packagejson_version) {"^7.2.1"}
+        it "returns false" do
+          expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+        end
+      end
+
       context "when local node/yarn/npm version is less than package.json" do
         let(:packagejson_version) {"^7.1.3"}
         it "returns false" do
@@ -207,6 +221,33 @@ describe Kapost::Bootstrapper do
         let(:packagejson_version) {"^7.1.2"}
         it "returns true" do
           expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+        end
+      end
+
+      context "double digit major version" do
+        before do
+          allow(cli).to receive(:capture2e).and_return(["12.16.2", success])
+        end
+
+        context "when local node/yarn/npm is a major version above package.json" do
+          let(:packagejson_version) {"^13.11.3"}
+          it "returns false" do
+            expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+          end
+        end
+
+        context "when local node/yarn/npm is at a compatible major and minor for package.json" do
+          let(:packagejson_version) {"^12.16.1"}
+          it "returns true" do
+            expect(bootstrapper.right_version?("node", packagejson_version)).to equal(true)
+          end
+        end
+
+        context "when local node/yarn/npm is a minor version below package.json" do
+          let(:packagejson_version) {"^12.17.3"}
+          it "returns false" do
+            expect(bootstrapper.right_version?("node", packagejson_version)).to equal(false)
+          end
         end
       end
     end
