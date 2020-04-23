@@ -93,7 +93,8 @@ module Kapost
     def right_version?(command, expected_version)
       version, status = get_version(command)
       if expected_version[0] == "^"
-        next_major = (expected_version[1].to_i + 1).to_s
+        # Parse out the major version and add 1. "^12.16.1" => 13
+        next_major = (expected_version[1..-1].split(".").first.to_i + 1).to_s
         Gem::Version.new(version) >= Gem::Version.new(expected_version[1..-1]) && Gem::Version.new(version) < Gem::Version.new(next_major)
       elsif expected_version[0] == "="
         Gem::Version.new(version) == Gem::Version.new(expected_version[1..-1])
